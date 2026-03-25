@@ -1,4 +1,3 @@
-#include "strings.h"
 
 MessageCache messageCache;
 
