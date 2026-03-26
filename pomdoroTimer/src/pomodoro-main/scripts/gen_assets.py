@@ -5,7 +5,7 @@ This script processes the assets directory to generate relevant C files
 import os
 import sys
 import shutil
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 # Directories
 ICON_INPUT_DIR = sys.argv[1] if len(sys.argv) > 1 else "assets/icons"
@@ -162,6 +162,77 @@ def process_images_directory(input_directory):
         agg_header.write("\n#endif // IMAGES_H\n")
     print(f"✔ Aggregated images header saved: {IMAGES_AGGREGATE_HEADER_FILE}")
 
+## claude code
+def generate_gfx_font(font_path, size, output_path):
+    """Generate Adafruit GFX compatible font header using PIL"""
+    font = ImageFont.truetype(font_path, size)
+    
+    font_name = os.path.splitext(os.path.basename(font_path))[0].replace("-", "_")
+    
+    glyphs = []
+    bitmaps = bytearray()
+    
+    # ASCII printable characters (32-126)
+    for char_code in range(32, 127):
+        char = chr(char_code)
+        
+        # Get character dimensions
+        bbox = font.getbbox(char)
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
+        
+        # Create bitmap for character
+        img = Image.new('1', (width, height), 0)
+        draw = ImageDraw.Draw(img)
+        draw.text((-bbox[0], -bbox[1]), char, font=font, fill=1)
+        
+        # Convert to bitmap data
+        bitmap_offset = len(bitmaps)
+        for y in range(height):
+            byte_val = 0
+            bit_num = 0
+            for x in range(width):
+                if img.getpixel((x, y)):
+                    byte_val |= (1 << (7 - bit_num))
+                bit_num += 1
+                if bit_num == 8:
+                    bitmaps.append(byte_val)
+                    byte_val = 0
+                    bit_num = 0
+            if bit_num > 0:
+                bitmaps.append(byte_val)
+        
+        glyphs.append({
+            'bitmapOffset': bitmap_offset,
+            'width': width,
+            'height': height,
+            'xAdvance': font.getlength(char),
+            'xOffset': bbox[0],
+            'yOffset': bbox[1]
+        })
+    
+    # Write header file
+    with open(output_path, 'w') as f:
+        # Write bitmap array
+        f.write(f"const uint8_t {font_name}{size}pt7bBitmaps[] PROGMEM = {{\n  ")
+        for i, byte in enumerate(bitmaps):
+            f.write(f"0x{byte:02X}")
+            if i < len(bitmaps) - 1:
+                f.write(", ")
+                if (i + 1) % 12 == 0:
+                    f.write("\n  ")
+        f.write("\n};\n\n")
+        
+        # Write glyph array
+        f.write(f"const GFXglyph {font_name}{size}pt7bGlyphs[] PROGMEM = {{\n")
+        for i, g in enumerate(glyphs):
+            f.write(f"  {{ {g['bitmapOffset']:5}, {g['width']:3}, {g['height']:3}, "
+                   f"{g['xAdvance']:3}, {g['xOffset']:4}, {g['yOffset']:4} }}")
+            if i < len(glyphs) - 1:
+                f.write(",")
+            f.write(f"  // 0x{32+i:02X} '{chr(32+i)}'\n")
+        f.write("};\n\n")
+  ## end claude's additions      
 
 def process_font(font_name, sizes):
     """Process a font file in multiple sizes using fontconvert."""
@@ -180,12 +251,17 @@ def process_font(font_name, sizes):
         output_path = os.path.join(output_dir, f"{output_name}.h")
 
         # Run fontconvert tool
-        cmd = f"fontconvert {font_path} {size} > {output_path}"
-        ret = os.system(cmd)
-        if ret == 0:
+        # cmd = f"fontconvert {font_path} {size} > {output_path}"
+        # ret = os.system(cmd)
+        # if ret == 0:
+        #     print(f"✔ Generated font header: {output_path}")
+        # else:
+        #     print(f"❌ Failed to generate font: {output_path}")
+        try:
+            generate_gfx_font(font_path, size, output_path)
             print(f"✔ Generated font header: {output_path}")
-        else:
-            print(f"❌ Failed to generate font: {output_path}")
+        except Exception as e:
+            print(f"❌ Failed to generate font: {output_path} - {e}")
 
 ##todo: fix fonts, this was not in src.
 def process_fonts():
@@ -200,7 +276,7 @@ def process_fonts():
     # Process only the fonts that are actually used in the project
     fonts_to_process = {
         "FunnelDisplay-Regular.ttf": [14],
-        "FunnelDisplay-Bold.ttf": [18, 24, 32, 48, 60],
+        "FunnelDisplay-Bold.ttf": [14, 18, 24, 32, 48, 60],
         "HelvetiPixel.ttf": [16, 24],
     }
 
