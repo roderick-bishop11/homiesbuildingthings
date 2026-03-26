@@ -187,7 +187,7 @@ def process_font(font_name, sizes):
         else:
             print(f"❌ Failed to generate font: {output_path}")
 
-
+##todo: fix fonts, this was not in src.
 def process_fonts():
     print("🔄 Processing fonts...")
 
