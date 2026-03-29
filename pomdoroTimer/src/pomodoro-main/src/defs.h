@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <GxEPD2_BW.h>
 #include <GxEPD2_GFX.h>
-
+// todo: fonts from the assets come here. add a font of choosing and build here
 #include "fonts/FunnelDisplay_Bold24pt7b.h"
 #include "fonts/FunnelDisplay_Bold18pt7b.h"
 #include "fonts/FunnelDisplay_Regular14pt7b.h"
