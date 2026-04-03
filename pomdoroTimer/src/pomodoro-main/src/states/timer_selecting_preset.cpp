@@ -110,11 +110,15 @@ void Timer::drawPresetSelection()
             Bounds pauseBounds = getBounds(display, pauseBuffer, &SECONDARY_FONT);
             Bounds pauseBoundsMin = getBounds(display, "min", &SUB_FONT);
 
-            const auto breakIcon = icon_coffee.scaled(48);
-            const unsigned int pauseIconSize = breakIcon.size;
+            //todo: new icon for taking a break and figur out icon size
+            // const auto breakIcon = icon_coffee.scaled(48);
+            const auto breakIcon = icon_lpesip;
+            // const unsigned int pauseIconSize = breakIcon.size;
+            const unsigned int pauseIconSize = 40;
             const unsigned int pauseIconX = xOffset + paddingInsideBox;
 
-            display.drawBitmap(pauseIconX, yOffset, breakIcon.data, pauseIconSize, pauseIconSize, GxEPD_BLACK);
+            //todo: once icon is fixed, add back the drawing of it
+            // display.drawBitmap(pauseIconX, yOffset, breakIcon.data, pauseIconSize, pauseIconSize, GxEPD_BLACK);
 
             drawText(display, pauseBuffer, endOfBoxContent - pauseBounds.w - paddingBetweenText - pauseBoundsMin.w, yOffset + pauseIconSize - 8, &SECONDARY_FONT, GxEPD_BLACK);
             drawText(display, "min", endOfBoxContent - pauseBoundsMin.w, yOffset + pauseIconSize - 8, &SUB_FONT, GxEPD_BLACK);
