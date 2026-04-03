@@ -5,6 +5,8 @@
 #include "icons.h"
 #include "images.h"
 
+//todo: add new icons 
+
 class IconProvider
 {
 private:
@@ -53,7 +55,8 @@ public:
             }
             else
             {
-                return &icon_coding;
+                // return &icon_coding;
+                return &icon_lpehacker;
             }
         }
         else if (strcmp(name, "Emails") == 0)
@@ -64,7 +67,8 @@ public:
             }
             else
             {
-                return &icon_email;
+                // return &icon_email;
+                return &icon_lpethink;
             }
         }
         else if (strcmp(name, "Focus") == 0)
@@ -75,7 +79,8 @@ public:
             }
             else
             {
-                return &icon_focus;
+                // return &icon_focus;
+                return &icon_lpenote;
             }
         }
 

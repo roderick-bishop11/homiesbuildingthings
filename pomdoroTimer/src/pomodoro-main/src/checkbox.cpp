@@ -69,8 +69,9 @@ void Checkbox::draw(
         drawPatternInRoundedArea(display, x, y, w, h, 10, Pattern::SparseDots);
     }
 
-    ScaledIcon checkmark = icon_checkmark.scaled(48);
-
+    //todo: new checkmark icon
+    // ScaledIcon checkmark = icon_checkmark.scaled(48);
+    ScaledIcon checkmark = icon_lpenote.scaled(24);
     const uint16_t iconSize = 64;
     if (icon)
     {

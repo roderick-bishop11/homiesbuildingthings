@@ -164,29 +164,22 @@ def process_images_directory(input_directory):
 
 ## claude code
 def generate_gfx_font(font_path, size, output_path):
-    """Generate Adafruit GFX compatible font header using PIL"""
     font = ImageFont.truetype(font_path, size)
-    
-    font_name = os.path.splitext(os.path.basename(font_path))[0].replace("-", "_")
-    
+    font_name = f"{os.path.splitext(os.path.basename(font_path))[0].replace('-', '_')}{size}"
+
     glyphs = []
     bitmaps = bytearray()
-    
-    # ASCII printable characters (32-126)
+
     for char_code in range(32, 127):
         char = chr(char_code)
-        
-        # Get character dimensions
         bbox = font.getbbox(char)
         width = bbox[2] - bbox[0]
         height = bbox[3] - bbox[1]
-        
-        # Create bitmap for character
-        img = Image.new('1', (width, height), 0)
+
+        img = Image.new('1', (max(width, 1), max(height, 1)), 0)
         draw = ImageDraw.Draw(img)
         draw.text((-bbox[0], -bbox[1]), char, font=font, fill=1)
-        
-        # Convert to bitmap data
+
         bitmap_offset = len(bitmaps)
         for y in range(height):
             byte_val = 0
@@ -201,20 +194,18 @@ def generate_gfx_font(font_path, size, output_path):
                     bit_num = 0
             if bit_num > 0:
                 bitmaps.append(byte_val)
-        
+
         glyphs.append({
             'bitmapOffset': bitmap_offset,
             'width': width,
             'height': height,
-            'xAdvance': font.getlength(char),
+            'xAdvance': int(font.getlength(char)),  # cast fixes narrowing warning
             'xOffset': bbox[0],
             'yOffset': bbox[1]
         })
-    
-    # Write header file
+
     with open(output_path, 'w') as f:
-        # Write bitmap array
-        f.write(f"const uint8_t {font_name}{size}pt7bBitmaps[] PROGMEM = {{\n  ")
+        f.write(f"const uint8_t {font_name}pt7bBitmaps[] PROGMEM = {{\n  ")
         for i, byte in enumerate(bitmaps):
             f.write(f"0x{byte:02X}")
             if i < len(bitmaps) - 1:
@@ -222,9 +213,8 @@ def generate_gfx_font(font_path, size, output_path):
                 if (i + 1) % 12 == 0:
                     f.write("\n  ")
         f.write("\n};\n\n")
-        
-        # Write glyph array
-        f.write(f"const GFXglyph {font_name}{size}pt7bGlyphs[] PROGMEM = {{\n")
+
+        f.write(f"const GFXglyph {font_name}pt7bGlyphs[] PROGMEM = {{\n")
         for i, g in enumerate(glyphs):
             f.write(f"  {{ {g['bitmapOffset']:5}, {g['width']:3}, {g['height']:3}, "
                    f"{g['xAdvance']:3}, {g['xOffset']:4}, {g['yOffset']:4} }}")
@@ -232,6 +222,13 @@ def generate_gfx_font(font_path, size, output_path):
                 f.write(",")
             f.write(f"  // 0x{32+i:02X} '{chr(32+i)}'\n")
         f.write("};\n\n")
+
+        # The missing GFXfont struct
+        f.write(f"const GFXfont {font_name}pt7b PROGMEM = {{\n")
+        f.write(f"  (uint8_t  *){font_name}pt7bBitmaps,\n")
+        f.write(f"  (GFXglyph *){font_name}pt7bGlyphs,\n")
+        f.write(f"  0x20, 0x7E, {size + 4}\n")
+        f.write(f"}};\n")
   ## end claude's additions      
 
 def process_font(font_name, sizes):
