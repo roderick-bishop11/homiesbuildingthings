@@ -13,3 +13,5 @@ src/strings_private.cpp
 src/anniversary.cpp
 
 dist/
+
+.env
