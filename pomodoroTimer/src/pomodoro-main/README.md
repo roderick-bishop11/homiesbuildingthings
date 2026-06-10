@@ -1,7 +1,7 @@
 This is the repository for an ESP32 based focus timer. Originally from [@Rukenshia](https://github.com/Rukenshia/pomodoro/tree/main), my friend and I decided to use his project as a base and tweak along the way. The original builder left it unfinished to adapt to our needs, we felt it was the perfect case study. It uses an ePaper display and a rotary dial for input. 
 
 ## contributors:
-- @qmcwili - Software/Computer Eng. & musician
+- @qmcwilli - Software/Computer Eng. & musician
 
 
 ## Project Origin
