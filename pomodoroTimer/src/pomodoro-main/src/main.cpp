@@ -101,6 +101,7 @@ void setup()
 
   // Initialize the display
   display.init(115200, true, 2, false);
+  Serial.println("After display.init\n\n");
   display.setRotation(0);
 
   // Load LPE mode setting from checkbox

@@ -18,6 +18,9 @@
 | CS   | 5   |
 | CLK  | 18  |
 | DIN  | 23  |
+| VCC  | 3.3v|
+| GND  | GND |
+|PWR    | 22    | 
 
 #### LED (WS2812)
 
